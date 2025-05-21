@@ -6,15 +6,24 @@ jobs:
   build:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
 
       - name: Install the project
-        run: uv sync --locked --all-groups
+        run: |
+          uv venv
+          uv pip install pyqt5
+          uv sync --all-groups
 
       - name: Run pyinstaller
         run: uv run hatch run buildinstall
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ matrix.os }}
+          path: dist/**
